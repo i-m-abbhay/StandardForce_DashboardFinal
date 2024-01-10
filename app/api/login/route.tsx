@@ -22,15 +22,17 @@ interface User {
     const reqBody = await req.json()
     const {userId, password} = reqBody;
     console.log(userId);
-  
+    
     try {
       const [userData] = await pool.query(
-        `select login_id, password from m_staff where login_id = ${userId}`
-      ) as unknown as [User]
-  
-      if (userData[0].length === 0) {
+        'SELECT id, login_id, password FROM m_staff WHERE login_id = ?',
+        [userId]
+      ) as unknown as [User];
+        console.log(userData);
+        console.log(Object.keys(userData).length);
+      if (Object.keys(userData).length === 0) {
         // User not found
-        return NextResponse.json({ message: 'Invalid username or password' }, {status : 401});
+        return NextResponse.json({ message: 'Invalid username' }, {status : 401});
       }
   
       const user = userData[0];
@@ -39,11 +41,31 @@ interface User {
   
       if (!passwordMatch) {
         // Passwords do not match
-        return NextResponse.json({ message: 'Invalid username or password' }, {status :401});
+        return NextResponse.json({ message: 'Invalid password' }, {status :401});
       }
+
+
+      const tokenData = {
+            staff_id: user.id,
+            login_id: user.login_id
+        }
+        //create token
+        const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: "1h"})
+        console.log(token);
   
       // Passwords match, login successful
-      return NextResponse.json({ message: 'Login successful',  }, {status :200});
+      const response = NextResponse.json({
+                message: "Login successful",
+                status: 200,
+                success: true,
+            })
+            response.cookies.set("token", token, {
+                httpOnly: true, 
+                
+            })
+            return response;
+            // return NextResponse.json({ message: 'Login successful',  }, {status :200});
+    
     } catch (error) {
       console.error('Database Error:', error);
       return NextResponse.json({ message: 'Internal Server Error' }, {status :500});
