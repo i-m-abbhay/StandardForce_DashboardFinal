@@ -1,17 +1,17 @@
 import { SalesTotalOverTime } from "@/app/lib/definitions";
 import {
-   fetchSalesQuantityOverTime,
-   fetchSalesTotalOverTime,
-   fetchTargetSalesTotalOverTime,
-   fetchTargetPerStaffDounut,
-   fetchDelieveryQuantityOverTime,
-   fetchgrossProfitDepartment,
-   fetchstackedbarchart,
-   fetchscatterplotedata,
-   fetchComparisionChartData,
-   fetchCardDetails,
-   fetchMixedPlot
-   // fetchCumulativeData
+  fetchSalesQuantityOverTime,
+  fetchSalesTotalOverTime,
+  fetchTargetSalesTotalOverTime,
+  fetchTargetPerStaffDounut,
+  fetchDelieveryQuantityOverTime,
+  fetchgrossProfitDepartment,
+  fetchstackedbarchart,
+  fetchscatterplotedata,
+  fetchComparisionChartData,
+  fetchCardDetails,
+  fetchMixedPlot,
+  // fetchCumulativeData
 } from "../../lib/data";
 import AreaChartComponent from "../../ui/dashboard/SalesTotal";
 import ExampleCard from "../../ui/dashboard/ExampleCard";
@@ -25,43 +25,45 @@ import ScatterChartPlot from "@/app/ui/dashboard/ScatterPlot";
 import CumulativeSales from "@/app/ui/dashboard/CumulativeSalesQuantity";
 import ComparisionBarChart from "@/app/ui/dashboard/ComparisionChartSales";
 import MainChartComponent from "@/app/ui/dashboard/Mainchart";
+import Choropleth from "@/app/ui/dashboard/Choropleth";
 export default async function Home() {
-   const salesOverTimeData: SalesTotalOverTime[] =
-      await fetchSalesTotalOverTime();
-   const salesTargetStaff: any = await fetchTargetSalesTotalOverTime();
-   const SalesQuantityOverTime: any = await fetchSalesQuantityOverTime();
-   const donutCharttargetData: any = await fetchTargetPerStaffDounut();
-   const delieveryQuantityOverTime:any= await fetchDelieveryQuantityOverTime();
-   const grossprofitdepartmentData: any= await fetchgrossProfitDepartment();
-   const  stackedbardata: any= await fetchstackedbarchart();
-   const scatterplotdata:any= await fetchscatterplotedata();
-   const comparisionbardata: any= await fetchComparisionChartData();
-   const carddata:any=await fetchCardDetails();
-   const mainchartdata:any=await fetchMixedPlot();
-   // const cumulativechartdata:any=await fetchCumulativeData();
-   console.log(carddata[0].TotalSales);
-   return (
-      <div className="flex flex-col p-6 gap-2">
-         <ExampleCard 
-         totalSales={carddata[0].TotalSales}
-         totalQuantity={carddata[0].TotalSalesQuantity}
-         totalProfit={carddata[0].TotalProfit}
-         />
-         <AreaChartComponent data={salesOverTimeData} />
-         {/* <AreaChartComponent data={salesTargetStaff} /> */}
-         <BarChartComponent data={salesTargetStaff} />
-         <div className="flex gap-2">
-         <DelieveryQuantityChartComponent data={delieveryQuantityOverTime}/>
-         <SalesQuantityChartComponent data={SalesQuantityOverTime} />
-         </div>
-         <GrossProfitDepartment data={grossprofitdepartmentData}/>
-         <StackedBarChart data={stackedbardata} />
-         <ComparisionBarChart data={comparisionbardata}/>
-         {/* <CumulativeSales data={cumulativechartdata}/> */}
-         {/* <ScatterChartPlot data={scatterplotdata} /> */}
-         {/* <DonutCharttarget data={donutCharttargetData}/> */}
-         {/* <LChart data={salesOverTimeData} /> */}
-         <MainChartComponent data={mainchartdata}/>
+  const salesOverTimeData: SalesTotalOverTime[] =
+    await fetchSalesTotalOverTime();
+  const salesTargetStaff: any = await fetchTargetSalesTotalOverTime();
+  const SalesQuantityOverTime: any = await fetchSalesQuantityOverTime();
+  const donutCharttargetData: any = await fetchTargetPerStaffDounut();
+  const delieveryQuantityOverTime: any = await fetchDelieveryQuantityOverTime();
+  const grossprofitdepartmentData: any = await fetchgrossProfitDepartment();
+  const stackedbardata: any = await fetchstackedbarchart();
+  const scatterplotdata: any = await fetchscatterplotedata();
+  const comparisionbardata: any = await fetchComparisionChartData();
+  const carddata: any = await fetchCardDetails();
+  const mainchartdata: any = await fetchMixedPlot();
+  // const cumulativechartdata:any=await fetchCumulativeData();
+  console.log(carddata[0].TotalSales);
+  return (
+    <div className="flex flex-col p-6 gap-2">
+      <ExampleCard
+        totalSales={carddata[0].TotalSales}
+        totalQuantity={carddata[0].TotalSalesQuantity}
+        totalProfit={carddata[0].TotalProfit}
+      />
+      <AreaChartComponent data={salesOverTimeData} />
+      {/* <AreaChartComponent data={salesTargetStaff} /> */}
+      <BarChartComponent data={salesTargetStaff} />
+      <div className="flex gap-2">
+        <DelieveryQuantityChartComponent data={delieveryQuantityOverTime} />
+        <SalesQuantityChartComponent data={SalesQuantityOverTime} />
       </div>
-   );
+      <GrossProfitDepartment data={grossprofitdepartmentData} />
+      <StackedBarChart data={stackedbardata} />
+      <ComparisionBarChart data={comparisionbardata} />
+      {/* <CumulativeSales data={cumulativechartdata}/> */}
+      {/* <ScatterChartPlot data={scatterplotdata} /> */}
+      {/* <DonutCharttarget data={donutCharttargetData}/> */}
+      {/* <LChart data={salesOverTimeData} /> */}
+      <MainChartComponent data={mainchartdata} />
+      <Choropleth dashboard={false} />
+    </div>
+  );
 }
