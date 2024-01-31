@@ -12,9 +12,9 @@
     "@heroicons/react": "^1.0.6",
     "@tremor/react": "^3.11.1",
     "apexcharts": "^3.45.1",
-    "axios": "^1.6.4",
     "d3-scale": "^4.0.2",
     "dotenv": "^16.3.1",
+    "japan-postal-code": "^0.3.0",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.0.1",
     "mysql2": "^3.6.5",
@@ -26,10 +26,12 @@
     "react-map-gl": "^7.1.7",
     "react-simple-maps": "^3.0.0",
     "react-slider": "^2.0.6",
+    "translate": "^2.0.2",
     "tremor": "^0.0.1"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.13",
+    "@types/leaflet": "^1.9.8",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -1,109 +1,3 @@
-// "use client";
-// import React, { useState } from "react";
-// import ReactMapGL, { Marker, Popup } from "react-map-gl";
-// // import { ViewportProps } from "react-map-gl";
-// // interface CustomerLocation {
-// //   id: number;
-// //   lat: number;
-// //   lng: number;
-// //   name: string;
-// // }
-
-// const MapComponent = () => {
-//   const [viewport, setViewport] = useState({
-//     latitude: 35.6895,
-//     longitude: 139.6917,
-//     zoom: 13,
-//   });
-
-//   const customerLocations = [
-//     { id: 1, lat: 35.6895, lng: 139.6917, name: "Customer 1" },
-//     { id: 2, lat: 35.6528, lng: 139.8395, name: "Customer 2" },
-//     { id: 3, lat: 35.4437, lng: 139.638, name: "Customer 3" },
-//     { id: 4, lat: 35.6894, lng: 139.6917, name: "Customer 4" },
-//     { id: 5, lat: 35.6895, lng: 139.7917, name: "Customer 5" },
-//     { id: 6, lat: 35.6895, lng: 139.5917, name: "Customer 6" },
-//     { id: 7, lat: 35.6895, lng: 139.6917, name: "Customer 7" },
-//     { id: 8, lat: 35.7895, lng: 139.6917, name: "Customer 8" },
-//     { id: 9, lat: 35.5895, lng: 139.6917, name: "Customer 9" },
-//     { id: 10, lat: 35.6895, lng: 139.8917, name: "Customer 10" },
-//     { id: 11, lat: 35.6895, lng: 139.4917, name: "Customer 11" },
-//     { id: 12, lat: 35.6895, lng: 139.6917, name: "Customer 12" },
-//     { id: 13, lat: 35.6895, lng: 139.2917, name: "Customer 13" },
-//     { id: 14, lat: 35.6895, lng: 139.6917, name: "Customer 14" },
-//     { id: 15, lat: 35.6895, lng: 139.9917, name: "Customer 15" },
-//     // Add more customer locations as needed
-//   ];
-
-//   return (
-//     <ReactMapGL
-//       {...viewport}
-//       width="100%"
-//       height="500px"
-//       mapStyle="mapbox://styles/mapbox/streets-v11"
-//       onViewportChange={(newViewport) => setViewport(newViewport)}
-//       mapboxApiAccessToken="YOUR_MAPBOX_ACCESS_TOKEN"
-//     >
-//       {customerLocations.map((customer) => (
-//         <Marker
-//           key={customer.id}
-//           latitude={customer.lat}
-//           longitude={customer.lng}
-//         >
-//           <Popup>{customer.name}</Popup>
-//         </Marker>
-//       ))}
-//     </ReactMapGL>
-//   );
-// };
-
-// export default MapComponent;
-// import React, { createContext } from "react";
-// import {
-//   ComposableMap,
-//   Geographies,
-//   Geography,
-//   ZoomableGroup,
-// } from "react-simple-maps";
-// import { scaleLinear } from "d3-scale";
-
-// // Replace this with your actual data.
-// const customerData = {
-//   Tokyo: 100,
-//   Osaka: 75,
-//   Hokkaido: 50,
-//   // ... more prefectures
-// };
-
-// const colorScale = scaleLinear<string>()
-//   .domain([0, Math.max(...Object.values(customerData))])
-//   .range(["#ffedea", "#ff5233"]);
-
-// const MapChart = () => {
-//   return (
-//     <ComposableMap>
-//       <ZoomableGroup>
-//         <Geographies geography="../data/gadm41_JPN_1.json">
-//           {({ geographies }) =>
-//             geographies.map((geo) => {
-//               // Ensure the property used here matches your GeoJSON structure
-//               const prefectureName = geo.properties.NAME_1;
-//               const customerCount = customerData[prefectureName] || 0;
-//               return (
-//                 <Geography
-//                   key={geo.rsmKey}
-//                   geography={geo}
-//                   fill={colorScale(customerCount)}
-//                 />
-//               );
-//             })
-//           }
-//         </Geographies>
-//       </ZoomableGroup>
-//     </ComposableMap>
-//   );
-// };
-
 // export default MapChart;
 "use client";
 // https://github.com/CodingWith-Adam/geoJson-map-with-react-leaflet/blob/master/src/components/MyMap.jsx
@@ -116,8 +10,45 @@ import {
   useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import japanMapData from "../../data/gadm41_JPN_1.json"; // Update this path
+import rawJapanMapData from "../../data/gadm41_JPN_1.json"; // Update this path
 import L, { Layer } from "leaflet";
+import postal_code from "japan-postal-code";
+import { translateAndCapitalize } from "../../utils/choroplethUtils.js";
+
+interface JapanGeoJSONFeatureProperties {
+  GID_1: string;
+  GID_0: string;
+  COUNTRY: string;
+  NAME_1: string;
+  VARNAME_1: string;
+  NL_NAME_1: string;
+  TYPE_1: string;
+  ENGTYPE_1: string;
+  CC_1: string;
+  HASC_1: string;
+  ISO_1: string;
+}
+
+interface JapanGeoJSONGeometry {
+  type: string;
+  coordinates: number[][][] | number[][][][]; // Adjust based on the complexity of the coordinates
+}
+
+interface JapanGeoJSONFeature {
+  type: "Feature";
+  properties: JapanGeoJSONFeatureProperties;
+  geometry: JapanGeoJSONGeometry;
+}
+
+interface JapanGeoJSON {
+  type: "FeatureCollection";
+  name: string;
+  crs: {
+    type: string;
+    properties: { name: string };
+  };
+  features: JapanGeoJSONFeature[];
+}
 
 // If necessary, define a type for the properties of your GeoJSON features
 type GeoJSONFeatureProperties = {
@@ -141,45 +72,173 @@ const SetView = ({
 
 interface MyMapProps {
   dashboard: boolean;
+  data: any;
 }
 
-const Choropleth: React.FC<MyMapProps> = ({ dashboard }) => {
+interface Address {
+  area: String;
+  city: String;
+  prefecture: String;
+  street: String;
+}
+
+const Choropleth: React.FC<MyMapProps> = ({ dashboard, data }) => {
   const [color, setColor] = useState<string>("#ffff00");
   const [center, setCenter] = useState<L.LatLngExpression>([36.2048, 138.2529]);
   const [zoom, setZoom] = useState<number>(5);
+  const [prefactureData, setPrefactureData] = useState<Object>({});
+  const [totalNumberOfCustomers, setTotalNumberOfCustomers] =
+    useState<Number>(0);
+
+  const japanMapData = rawJapanMapData as JapanGeoJSON;
+  const TotalCustomers = 100; // Example total
+  console.log("choropleth zip code data: ", data);
+
+  // const buildPrefactureData = () => {
+  //   const prefData = {};
+  //   for (let pref in data.zipCodeData) {
+  //     let prefactureName = postal_code.get(pref, function (address) {
+  //       translateAndCapitalize(address.prefecture, function (prefectureEn) {
+  //         return prefectureEn;
+  //       });
+  //     });
+  //     if (prefactureName in prefData) {
+  //       prefData[prefactureName] += data.zipCodeData[pref];
+  //     } else {
+  //       prefData[prefactureName] = data.zipCodeData[pref];
+  //     }
+  //   }
+
+  //   return prefData;
+  // };
 
   useEffect(() => {
-    console.log(japanMapData);
-  }, []);
+    const buildPrefectureData = async (rawData) => {
+      const prefData = {};
+      const zipCodes = Object.keys(rawData.zipCodes);
+      console.log("zipcodes: ", zipCodes);
+      // I think problem is here promises are not getting resolved or fullfilled
+      await Promise.all(
+        zipCodes.map(async (zipCode) => {
+          try {
+            const address: Address = await new Promise((resolve, reject) => {
+              postal_code.get(zipCode, (data) => {
+                if (data && data.prefecture) {
+                  resolve(data);
+                } else {
+                  reject(new Error(`No data for zipCode: ${zipCode}`));
+                }
+              });
+            });
 
-  const countryStyle: L.PathOptions = {
-    fillColor: "red",
-    fillOpacity: 1,
-    color: "black",
-    weight: 2,
+            console.log("address: ", address);
+
+            if (address && address.prefecture) {
+              const prefectureEn = await translateAndCapitalize(
+                address.prefecture
+              );
+              console.log("prefecture name: ", prefectureEn);
+              prefData[prefectureEn] =
+                (prefData[prefectureEn] || 0) + rawData.zipCodes[zipCode];
+            }
+          } catch (error) {
+            console.error(`Error processing zip code ${zipCode}:`, error);
+          }
+        })
+      );
+
+      setPrefactureData(prefData);
+      setTotalNumberOfCustomers(parseInt(rawData.totalNumberOfZipcodes, 10));
+    };
+
+    if (data && data.zipCodes) {
+      buildPrefectureData(data)
+        .then(() => {
+          console.log("Prefecture data built successfully.", prefactureData);
+        })
+        .catch((error) => {
+          console.error("Error building prefecture data:", error);
+        });
+    }
+  }, [data, prefactureData]);
+
+  const myRetrievedData = {
+    // Example data
+    Aichi: 20,
+    Osaka: 20,
+    Tokyo: 60,
+    // ...
   };
 
-  const changeCountryColor = (event: L.LayerEvent) => {
-    const layer = event.target as L.Path;
-    layer.setStyle({
-      color: "green",
-      fillColor: color,
-      fillOpacity: 1,
-    });
+  // Adjust the style based on the number of customers
+  const getStyle = (feature: any): L.PathOptions => {
+    // Assuming properties have the same structure as JapanGeoJSONFeatureProperties
+    const properties = feature.properties as JapanGeoJSONFeatureProperties;
+
+    if (properties && properties.NAME_1) {
+      const regionName = properties.NAME_1;
+      const numberOfCustomers = myRetrievedData[regionName] || 0;
+
+      const fillOpacity = Math.min(numberOfCustomers / TotalCustomers, 1); // Ensuring opacity is between 0 and 1
+
+      return {
+        fillColor: "red",
+        fillOpacity: fillOpacity,
+        color: "black",
+        weight: 2,
+      };
+    } else {
+      // Default style if properties are not available
+      return {
+        fillColor: "red",
+        fillOpacity: 0.5,
+        color: "black",
+        weight: 2,
+      };
+    }
+  };
+
+  const getNumberOfCustomers = (regionName: string) => {
+    return myRetrievedData[regionName] || 0;
   };
 
   const onEachCountry = (
     country: GeoJSON.Feature<GeoJSON.Geometry, GeoJSONFeatureProperties>,
     layer: Layer
   ) => {
-    const countryName = country.properties.NAME_1; // Adjust based on Japan GeoJSON properties
-    console.log(countryName);
-    layer.bindPopup(countryName);
+    const countryName = country.properties?.NAME_1; // Adjust based on Japan GeoJSON properties
+    const numberOfCustomers = getNumberOfCustomers(countryName);
+    const fillOpacity = Math.min(numberOfCustomers / TotalCustomers, 1);
+    // if (myRetrievedData[countryName]) {
+    //   console.log("no of customers: ", numberOfCustomers);
+    //   console.log("region: ", countryName);
+    // }
+    // Bind tooltip
+    if (countryName) {
+      // console.log(
+      //   `Processing: ${countryName}, Customers: ${numberOfCustomers}`
+      // );
+      layer.bindTooltip(
+        `Region: ${countryName}<br>Customers: ${numberOfCustomers}`
+      );
+    }
 
-    layer.options.fillOpacity = Math.random(); // Example randomness, adjust as needed
+    // Mouseover event
+    layer.on("mouseover", (e) => {
+      const layer = e.target;
+      layer.setStyle({
+        weight: 5, // Increase border weight
+        fillOpacity: 1, // You can adjust opacity if needed
+      });
+    });
 
-    (layer as L.Path).on({
-      click: changeCountryColor,
+    // Mouseout event
+    layer.on("mouseout", (e) => {
+      const layer = e.target;
+      layer.setStyle({
+        weight: 2, // Reset border weight to original
+        fillOpacity: fillOpacity, // Reset opacity to original
+      });
     });
   };
 
@@ -199,14 +258,14 @@ const Choropleth: React.FC<MyMapProps> = ({ dashboard }) => {
 
       <MapContainer
         style={{ height: "80vh", borderRadius: "20px" }}
-        // center={center}
-        // zoom={zoom}
+        center={center}
+        zoom={zoom}
       >
         <SetView center={center} zoom={zoom} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON
-          style={countryStyle}
-          data={japanMapData.features}
+          style={getStyle}
+          data={japanMapData}
           onEachFeature={onEachCountry as any} // Casting as any to avoid type mismatch
         />
       </MapContainer>

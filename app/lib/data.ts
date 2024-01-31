@@ -1,6 +1,40 @@
 import pool from "./pool";
 import { unstable_noStore as noStore } from "next/cache";
 import { SalesTotalOverTime } from "./definitions";
+import { RowDataPacket } from "mysql2";
+
+import { buildPrefactureData } from "../utils/choroplethUtils";
+
+export async function fetchCustomerCountByZipCode(): Promise<any> {
+  console.log("Fetching Customer Count by Zip Code...");
+
+  try {
+    const [rows] = (await pool.query(`
+      SELECT zipcode, COUNT(*) as customerCount
+      FROM tomsms_db.m_customer
+      GROUP BY zipcode
+    `)) as [RowDataPacket[], any]; // Assert the type of rows as RowDataPacket[]
+
+    // Calculate the total number of unique zip codes
+    const totalNumberOfZipcodes = rows.length;
+
+    // Construct the response object
+    const response = {
+      totalNumberOfZipcodes: totalNumberOfZipcodes.toString(),
+      zipCodes: rows.reduce((acc: any, row: any) => {
+        acc[row.zipcode] = row.customerCount;
+        return acc;
+      }, {}),
+    };
+
+    // const response = buildPrefactureData(rawResponse);
+
+    return response;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch Customer Count by Zip Code.");
+  }
+}
 
 //Total Sales Over Time
 export async function fetchSalesTotalOverTime(): Promise<SalesTotalOverTime[]> {

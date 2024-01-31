@@ -28,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/choropleth/page.jsx"
+    "app/choropleth/page.jsx",
+    "app/utils/choroplethUtils.js"
   ],
   "exclude": ["node_modules"]
 }

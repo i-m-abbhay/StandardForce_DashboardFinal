@@ -11,6 +11,7 @@ import {
   fetchComparisionChartData,
   fetchCardDetails,
   fetchMixedPlot,
+  fetchCustomerCountByZipCode,
   // fetchCumulativeData
 } from "../../lib/data";
 import AreaChartComponent from "../../ui/dashboard/SalesTotal";
@@ -26,7 +27,11 @@ import CumulativeSales from "@/app/ui/dashboard/CumulativeSalesQuantity";
 import ComparisionBarChart from "@/app/ui/dashboard/ComparisionChartSales";
 import MainChartComponent from "@/app/ui/dashboard/Mainchart";
 import Choropleth from "@/app/ui/dashboard/Choropleth";
+
+import { useEffect } from "react";
+
 export default async function Home() {
+  // const [zipCodeData, setZipCodeData] = useState<Object>({});
   const salesOverTimeData: SalesTotalOverTime[] =
     await fetchSalesTotalOverTime();
   const salesTargetStaff: any = await fetchTargetSalesTotalOverTime();
@@ -39,7 +44,8 @@ export default async function Home() {
   const comparisionbardata: any = await fetchComparisionChartData();
   const carddata: any = await fetchCardDetails();
   const mainchartdata: any = await fetchMixedPlot();
-  // const cumulativechartdata:any=await fetchCumulativeData();
+  const rawZipCodeData: any = await fetchCustomerCountByZipCode();
+  console.log("raw zip code data: ", rawZipCodeData);
   console.log(carddata[0].TotalSales);
   return (
     <div className="flex flex-col p-6 gap-2">
@@ -63,7 +69,7 @@ export default async function Home() {
       {/* <DonutCharttarget data={donutCharttargetData}/> */}
       {/* <LChart data={salesOverTimeData} /> */}
       <MainChartComponent data={mainchartdata} />
-      <Choropleth dashboard={false} />
+      <Choropleth dashboard={false} data={rawZipCodeData} />
     </div>
   );
 }
